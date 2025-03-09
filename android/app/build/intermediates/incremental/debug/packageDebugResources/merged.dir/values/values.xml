@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">554345668376</string>
+    <string name="google_api_key" translatable="false">AIzaSyBcqmxSit4_LVFyY5TmU-PU6z7V8Rco7V0</string>
+    <string name="google_app_id" translatable="false">1:554345668376:android:16a2475b4341188f1dc86d</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBcqmxSit4_LVFyY5TmU-PU6z7V8Rco7V0</string>
+    <string name="google_storage_bucket" translatable="false">deeptalk-1bed9.firebasestorage.app</string>
+    <string name="project_id" translatable="false">deeptalk-1bed9</string>
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        
+        <item name="android:windowBackground">@drawable/launch_background</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>
