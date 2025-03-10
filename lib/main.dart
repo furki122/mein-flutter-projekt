@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logger/logger.dart';
-import 'screens/chats_screen.dart';
+
+// Import der Screens
+import 'screens/email_auth_screen.dart';
+import 'screens/register_screen.dart'; // Import des Registrierungsscreens
+import 'screens/chats_list_screen.dart'; // Angepasster Chat-Listen-Screen
 import 'screens/status_screen.dart';
 import 'screens/calls_screen.dart';
-import 'screens/phone_auth_screen.dart';
+import 'screens/search_user_screen.dart';
+import 'screens/friend_requests_screen.dart';
 
 // Logger-Instanz
 final logger = Logger();
@@ -27,11 +31,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'WhatsApp Clone',
+      title: 'DeepTalk',
       theme: ThemeData(
         primarySwatch: Colors.teal,
       ),
       home: const AuthWrapper(),
+      routes: {
+        '/register': (context) => const RegisterScreen(), // Route für Registrierung
+      },
     );
   }
 }
@@ -49,14 +56,14 @@ class AuthWrapper extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         } else if (snapshot.hasError) {
-          logger.e("Fehler im AuthWrapper: ${snapshot.error}");
+          logger.e("Fehler in AuthWrapper: ${snapshot.error}");
           return const Scaffold(
             body: Center(child: Text("Ein Fehler ist aufgetreten.")),
           );
         } else if (snapshot.hasData) {
           return const MainScreen();
         } else {
-          return const PhoneAuthScreen();
+          return const EmailAuthScreen(); // Standard: Login-Screen
         }
       },
     );
@@ -75,72 +82,21 @@ class _MainScreenState extends State<MainScreen> {
 
   // Liste der Bildschirme für die Tabs
   final List<Widget> _screens = [
-    const ChatsScreen(),
+    const ChatsListScreen(), // Angepasst: Chat-Listen-Screen
     const StatusScreen(),
     const CallsScreen(),
+    const SearchUserScreen(),
+    const FriendRequestsScreen(),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    setupFirebaseMessaging();
-  }
-
-  void setupFirebaseMessaging() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-    // Berechtigungen anfordern (für iOS)
-    NotificationSettings settings = await messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      logger.i('Benachrichtigungen erlaubt');
-    } else {
-      logger.w('Benachrichtigungen nicht erlaubt');
-    }
-
-    // Token abrufen
-    try {
-      String? token = await messaging.getToken();
-      if (token != null) {
-        logger.i("FCM Token: $token");
-      } else {
-        logger.w("FCM Token konnte nicht abgerufen werden.");
-      }
-    } catch (e) {
-      logger.e("Fehler beim Abrufen des FCM-Tokens: $e");
-    }
-
-    // Listener für eingehende Nachrichten
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      logger.i("Nachricht erhalten: ${message.notification?.title}");
-      logger.i("Nachrichtentext: ${message.notification?.body}");
-
-      if (message.notification != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("${message.notification!.title}: ${message.notification!.body}"),
-          ),
-        );
-      }
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      logger.i("Nachricht geöffnet: ${message.notification?.title}");
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('WhatsApp Clone'),
+        title: const Text('DeepTalk'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.exit_to_app),
             onPressed: () async {
               await FirebaseAuth.instance.signOut();
             },
@@ -167,6 +123,14 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.call),
             label: 'Anrufe',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Freunde suchen',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_add),
+            label: 'Anfragen',
           ),
         ],
         selectedItemColor: Colors.teal,
